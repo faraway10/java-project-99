@@ -1,0 +1,7 @@
+spring:
+  datasource:
+    platform: postgres
+    url: ${JDBC_DATABASE_URL}
+    driverClassName: org.postgresql.Driver
+  jpa:
+    database: POSTGRESQL
