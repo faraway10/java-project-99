@@ -1,10 +1,8 @@
 package hexlet.code.component;
 
 import hexlet.code.dto.UserCreateDTO;
-import hexlet.code.dto.UserDTO;
 import hexlet.code.mapper.UserMapper;
 import hexlet.code.repository.UserRepository;
-import hexlet.code.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -14,7 +12,7 @@ import lombok.AllArgsConstructor;
 
 @Component
 @AllArgsConstructor
-public class DataInitializer implements ApplicationRunner {
+class DataInitializer implements ApplicationRunner {
 
     @Autowired
     private final UserRepository userRepository;
@@ -30,6 +28,7 @@ public class DataInitializer implements ApplicationRunner {
         userData.setLastName("lannister");
         userData.setPassword("qwerty");
         var user = userMapper.map(userData);
+        System.out.println("Debug: " + user.getPassword());
         userRepository.save(user);
     }
 }

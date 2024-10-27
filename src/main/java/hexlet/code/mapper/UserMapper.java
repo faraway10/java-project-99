@@ -1,6 +1,5 @@
 package hexlet.code.mapper;
 
-import hexlet.code.util.Encoder;
 import org.mapstruct.BeforeMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingConstants;
@@ -14,6 +13,7 @@ import hexlet.code.dto.UserCreateDTO;
 import hexlet.code.dto.UserDTO;
 import hexlet.code.dto.UserUpdateDTO;
 import hexlet.code.model.User;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Mapper(
         uses = {JsonNullableMapper.class, ReferenceMapper.class},
@@ -23,7 +23,7 @@ import hexlet.code.model.User;
 )
 public abstract class UserMapper {
     @Autowired
-    private Encoder encoder;
+    private PasswordEncoder encoder;
 
     public abstract User map(UserCreateDTO model);
 
@@ -34,16 +34,16 @@ public abstract class UserMapper {
     public abstract void update(UserUpdateDTO dto, @MappingTarget User model);
 
     @BeforeMapping
-    public void encryptPassword(UserCreateDTO dto) {
+    final void encryptPassword(UserCreateDTO dto) {
         var password = dto.getPassword();
-        dto.setPassword(encoder.encodePassword(password));
+        dto.setPassword(encoder.encode(password));
     }
 
     @BeforeMapping
-    public void encryptPassword(UserUpdateDTO dto) {
+    final void encryptPassword(UserUpdateDTO dto) {
         var password = dto.getPassword();
         if (password != null) {
-            dto.setPassword(JsonNullable.of(encoder.encodePassword(password.get())));
+            dto.setPassword(JsonNullable.of(encoder.encode(password.get())));
         }
     }
 }

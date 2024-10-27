@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 @SpringBootApplication
 @EnableJpaAuditing
-public class AppApplication {
+class AppApplication {
 
     @Autowired
     private UserRepository userRepository;
