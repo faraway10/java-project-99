@@ -10,6 +10,7 @@ import hexlet.code.mapper.UserMapper;
 import hexlet.code.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,10 +37,13 @@ class UsersController {
 
     @GetMapping("")
     @ResponseStatus(HttpStatus.OK)
-    public List<UserDTO> index() {
-        return userRepository.findAll().stream()
+    public ResponseEntity<List<UserDTO>> index() {
+        var userDTOS = userRepository.findAll().stream()
                 .map(userMapper::map)
                 .toList();
+        return ResponseEntity.ok()
+                .header("X-Total-Count", String.valueOf(userDTOS.size()))
+                .body(userDTOS);
     }
 
     @PostMapping("")
