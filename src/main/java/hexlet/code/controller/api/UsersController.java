@@ -27,7 +27,6 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("/api/users")
 class UsersController {
-    // BEGIN
     @Autowired
     private UserRepository userRepository;
     @Autowired
@@ -36,7 +35,6 @@ class UsersController {
             = "@userRepository.findById(#id).get().getEmail() == authentication.getName()";
 
     @GetMapping("")
-    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<List<UserDTO>> index() {
         var userDTOS = userRepository.findAll().stream()
                 .map(userMapper::map)
@@ -81,5 +79,4 @@ class UsersController {
     public void destroy(@PathVariable Long id) {
         userRepository.deleteById(id);
     }
-    // END
 }
