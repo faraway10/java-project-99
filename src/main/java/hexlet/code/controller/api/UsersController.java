@@ -2,11 +2,13 @@ package hexlet.code.controller.api;
 
 import java.util.List;
 
-import hexlet.code.dto.UserCreateDTO;
-import hexlet.code.dto.UserDTO;
-import hexlet.code.dto.UserUpdateDTO;
+import hexlet.code.dto.user.UserCreateDTO;
+import hexlet.code.dto.user.UserDTO;
+import hexlet.code.dto.user.UserUpdateDTO;
+import hexlet.code.exception.BadRequestException;
 import hexlet.code.exception.ResourceNotFoundException;
 import hexlet.code.mapper.UserMapper;
+import hexlet.code.repository.TaskRepository;
 import hexlet.code.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -29,6 +31,8 @@ import jakarta.validation.Valid;
 class UsersController {
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private TaskRepository taskRepository;
     @Autowired
     private UserMapper userMapper;
     private static final String IS_ALLOWED
@@ -77,6 +81,10 @@ class UsersController {
     @PreAuthorize(IS_ALLOWED)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void destroy(@PathVariable Long id) {
+        if (taskRepository.existsByAssigneeId(id)) {
+            throw new BadRequestException("User with " + id + " still has a task");
+        }
+
         userRepository.deleteById(id);
     }
 }

@@ -1,8 +1,10 @@
 package hexlet.code.component;
 
-import hexlet.code.dto.UserCreateDTO;
+import hexlet.code.dto.user.UserCreateDTO;
 import hexlet.code.mapper.UserMapper;
+import hexlet.code.model.Task;
 import hexlet.code.model.TaskStatus;
+import hexlet.code.repository.TaskRepository;
 import hexlet.code.repository.TaskStatusRepository;
 import hexlet.code.repository.UserRepository;
 
@@ -29,6 +31,9 @@ class DataInitializer implements ApplicationRunner {
     @Autowired
     private final TaskStatusRepository taskStatusRepository;
 
+    @Autowired
+    private final TaskRepository taskRepository;
+
     private final List<String> defaultTaskStatusSlugs = List.of(
             "draft",
             "to_review",
@@ -54,5 +59,12 @@ class DataInitializer implements ApplicationRunner {
             taskStatus.setSlug(slug);
             taskStatusRepository.save(taskStatus);
         }
+
+        var task = new Task();
+        task.setIndex(42);
+        task.setAssignee(user);
+        task.setName("Init task");
+        task.setTaskStatus(taskStatusRepository.findBySlug("draft").get());
+        taskRepository.save(task);
     }
 }

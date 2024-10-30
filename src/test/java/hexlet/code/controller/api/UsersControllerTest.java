@@ -12,6 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 
+import hexlet.code.util.ModelGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.JwtRequestPostProcessor;
 
@@ -20,11 +21,9 @@ import java.util.List;
 import java.util.HashMap;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import hexlet.code.dto.UserDTO;
+import hexlet.code.dto.user.UserDTO;
 import hexlet.code.mapper.UserMapper;
 import org.assertj.core.api.Assertions;
-import org.instancio.Instancio;
-import org.instancio.Select;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -35,8 +34,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import hexlet.code.model.User;
 import hexlet.code.repository.UserRepository;
 import net.datafaker.Faker;
 import org.springframework.web.context.WebApplicationContext;
@@ -68,6 +65,9 @@ class UsersControllerTest {
     @Autowired
     private PasswordEncoder encoder;
 
+    @Autowired
+    private ModelGenerator modelGenerator;
+
     private JwtRequestPostProcessor token;
 
     @BeforeEach
@@ -78,18 +78,6 @@ class UsersControllerTest {
                 .build();
 
         token = jwt().jwt(builder -> builder.subject("hexlet@example.com"));
-    }
-
-    private User getNewSavedUser() {
-        var user = Instancio.of(User.class)
-                .ignore(Select.field(User::getId))
-                .supply(Select.field(User::getFirstName), () -> faker.name().firstName())
-                .supply(Select.field(User::getLastName), () -> faker.name().lastName())
-                .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
-                .supply(Select.field(User::getPassword), () -> faker.internet().password(3, 32))
-                .create();
-        userRepository.save(user);
-        return user;
     }
 
     @Test
@@ -148,7 +136,7 @@ class UsersControllerTest {
 
     @Test
     public void testShow() throws Exception {
-        var user = getNewSavedUser();
+        var user = modelGenerator.getNewSavedUser();
         var request = get("/api/users/" + user.getId()).with(jwt());
         var response = mockMvc.perform(request)
                 .andExpect(status().isOk())
@@ -199,7 +187,7 @@ class UsersControllerTest {
 
     @Test
     public void testUpdateAnotherUser() throws Exception {
-        var testUser = getNewSavedUser();
+        var testUser = modelGenerator.getNewSavedUser();
         var data = new HashMap<>();
         var firstName = faker.name().firstName();
         data.put("firstName", firstName);
@@ -215,7 +203,7 @@ class UsersControllerTest {
 
     @Test
     public void testSelfDestroy() throws Exception {
-        var user = getNewSavedUser();
+        var user = modelGenerator.getNewSavedUser();
         var userToken = jwt().jwt(builder -> builder.subject(user.getEmail()));
 
         assertTrue(userRepository.existsById(user.getId()));
@@ -229,14 +217,28 @@ class UsersControllerTest {
 
     @Test
     public void testDestroyAnotherUser() throws Exception {
-        var user = getNewSavedUser();
-
-        assertTrue(userRepository.existsById(user.getId()));
+        var user = modelGenerator.getNewSavedUser();
 
         var request = delete("/api/users/" + user.getId())
                 .with(token);
         mockMvc.perform(request)
                 .andExpect(status().isForbidden());
+
+        assertTrue(userRepository.existsById(user.getId()));
+    }
+
+    @Test
+    public void testSelfDestroyIfUserHasTask() throws Exception {
+        var task = modelGenerator.getNewSavedTask();
+        var user = task.getAssignee();
+
+        var userToken = jwt().jwt(builder -> builder.subject(user.getEmail()));
+
+        var request = delete("/api/users/" + user.getId()).with(userToken);
+        mockMvc.perform(request)
+                .andExpect(status().isBadRequest());
+
+        assertTrue(userRepository.existsById(user.getId()));
     }
 
     @Test
@@ -255,7 +257,7 @@ class UsersControllerTest {
 
     @Test
     public void testUpdateNotValid() throws Exception {
-        var testUser = getNewSavedUser();
+        var testUser = modelGenerator.getNewSavedUser();
         var data = new HashMap<>();
         var password = faker.internet().password(1, 2);
         data.put("password", password);
