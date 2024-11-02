@@ -1,8 +1,10 @@
 package hexlet.code.util;
 
+import hexlet.code.model.Label;
 import hexlet.code.model.Task;
 import hexlet.code.model.TaskStatus;
 import hexlet.code.model.User;
+import hexlet.code.repository.LabelRepository;
 import hexlet.code.repository.TaskRepository;
 import hexlet.code.repository.TaskStatusRepository;
 import hexlet.code.repository.UserRepository;
@@ -12,6 +14,8 @@ import org.instancio.Select;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
+
+import java.util.Set;
 
 @Component
 public final class ModelGenerator {
@@ -26,6 +30,9 @@ public final class ModelGenerator {
 
     @Autowired
     private TaskRepository taskRepository;
+
+    @Autowired
+    private LabelRepository labelRepository;
 
     @Bean
     public ModelGenerator getModelGenerator() {
@@ -62,8 +69,21 @@ public final class ModelGenerator {
                 .supply(Select.field(Task::getDescription), () -> faker.lorem().paragraph())
                 .supply(Select.field(Task::getTaskStatus), () -> taskStatusRepository.findAll().getFirst())
                 .supply(Select.field(Task::getAssignee), () -> userRepository.findAll().getFirst())
+                .supply(Select.field(Task::getLabels), () -> Set.of(
+                        getNewSavedLabel(),
+                        getNewSavedLabel()
+                ))
                 .create();
         taskRepository.save(task);
         return task;
+    }
+
+    public Label getNewSavedLabel() {
+        var label = Instancio.of(Label.class)
+                .ignore(Select.field(Label::getId))
+                .supply(Select.field(Label::getName), () -> String.join(" ", faker.lorem().words(3)))
+                .create();
+        labelRepository.save(label);
+        return label;
     }
 }

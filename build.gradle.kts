@@ -38,6 +38,7 @@ dependencies {
 	implementation("org.openapitools:jackson-databind-nullable:0.2.6")
 	implementation("org.mapstruct:mapstruct:1.6.0.Beta1")
 	implementation("org.apache.commons:commons-text:1.12.0")
+	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
 
 	annotationProcessor("org.mapstruct:mapstruct-processor:1.6.0.Beta1")
 	runtimeOnly("com.h2database:h2:2.2.224")

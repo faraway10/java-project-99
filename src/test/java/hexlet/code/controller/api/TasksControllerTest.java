@@ -12,6 +12,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 
+import hexlet.code.model.Label;
+import hexlet.code.repository.LabelRepository;
 import hexlet.code.repository.TaskStatusRepository;
 import hexlet.code.repository.UserRepository;
 import hexlet.code.util.ModelGenerator;
@@ -21,6 +23,8 @@ import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequ
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.HashMap;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import hexlet.code.dto.task.TaskDTO;
@@ -62,6 +66,9 @@ class TasksControllerTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private LabelRepository labelRepository;
 
     @Autowired
     private ObjectMapper om;
@@ -107,6 +114,10 @@ class TasksControllerTest {
         var title = String.join(" ", faker.lorem().words(9));
         var content = faker.lorem().paragraph();
         var status = taskStatusRepository.findAll().getFirst().getSlug();
+        var taskLabelIds = labelRepository.findAll()
+                .stream()
+                .map(Label::getId)
+                .collect(Collectors.toSet());
 
         var data = new HashMap<>();
         data.put("index", index);
@@ -114,7 +125,7 @@ class TasksControllerTest {
         data.put("title", title);
         data.put("content", content);
         data.put("status", status);
-
+        data.put("taskLabelIds", taskLabelIds);
 
         var request = post("/api/tasks").with(jwt())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -131,6 +142,8 @@ class TasksControllerTest {
         assertThat(task.getName()).isEqualTo(title);
         assertThat(task.getDescription()).isEqualTo(content);
         assertThat(task.getTaskStatus().getSlug()).isEqualTo(status);
+        assertThat(task.getLabels().stream().map(Label::getId).collect(Collectors.toSet()))
+                .isEqualTo(taskLabelIds);
 
         // Сравниваем данные модели с данными в ответе метода
         var responseBody = response.getResponse().getContentAsString();
@@ -141,6 +154,8 @@ class TasksControllerTest {
                 o -> o.node("title").isEqualTo(task.getName()),
                 o -> o.node("content").isEqualTo(task.getDescription()),
                 o -> o.node("status").isEqualTo(task.getTaskStatus().getSlug()),
+                o -> o.node("taskLabelIds")
+                        .isEqualTo(task.getLabels().stream().map(Label::getId).collect(Collectors.toSet())),
                 o -> o.node("createdAt").isEqualTo(Utils.formatDate(task.getCreatedAt()))
         );
     }
@@ -148,10 +163,12 @@ class TasksControllerTest {
     @Test
     public void testShow() throws Exception {
         var task = modelGenerator.getNewSavedTask();
+
         var request = get("/api/tasks/" + task.getId()).with(jwt());
         var response = mockMvc.perform(request)
                 .andExpect(status().isOk())
                 .andReturn();
+
         var responseBody = response.getResponse().getContentAsString();
         assertThatJson(responseBody).and(
                 o -> o.node("id").isEqualTo(task.getId()),
@@ -160,6 +177,8 @@ class TasksControllerTest {
                 o -> o.node("title").isEqualTo(task.getName()),
                 o -> o.node("content").isEqualTo(task.getDescription()),
                 o -> o.node("status").isEqualTo(task.getTaskStatus().getSlug()),
+                o -> o.node("taskLabelIds")
+                        .isEqualTo(task.getLabels().stream().map(Label::getId).collect(Collectors.toSet())),
                 o -> o.node("createdAt").isEqualTo(Utils.formatDate(task.getCreatedAt()))
         );
     }
@@ -167,14 +186,22 @@ class TasksControllerTest {
     @Test
     public void testUpdate() throws Exception {
         var testTask = modelGenerator.getNewSavedTask();
+
         var data = new HashMap<>();
         var title = faker.lorem().word();
         var content = faker.lorem().paragraph();
         var status = taskStatusRepository.findAll().getFirst().getSlug();
+        var taskLabelIds = Set.of(
+                modelGenerator.getNewSavedLabel().getId(),
+                modelGenerator.getNewSavedLabel().getId()
+        );
 
         data.put("title", title);
         data.put("content", content);
         data.put("status", status);
+        data.put("taskLabelIds", taskLabelIds);
+
+        System.out.println("Debug: " + om.writeValueAsString(data));
 
         var request = put("/api/tasks/" + testTask.getId())
                 .with(jwt())
@@ -191,6 +218,8 @@ class TasksControllerTest {
         assertThat(task.getName()).isEqualTo(title);
         assertThat(task.getDescription()).isEqualTo(content);
         assertThat(task.getTaskStatus().getSlug()).isEqualTo(status);
+        assertThat(task.getLabels().stream().map(Label::getId).collect(Collectors.toSet()))
+                .isEqualTo(taskLabelIds);
 
         // Сравниваем данные модели с данными в ответе метода
         var responseBody = response.getResponse().getContentAsString();
@@ -201,6 +230,8 @@ class TasksControllerTest {
                 o -> o.node("title").isEqualTo(task.getName()),
                 o -> o.node("content").isEqualTo(task.getDescription()),
                 o -> o.node("status").isEqualTo(task.getTaskStatus().getSlug()),
+                o -> o.node("taskLabelIds")
+                        .isEqualTo(task.getLabels().stream().map(Label::getId).collect(Collectors.toSet())),
                 o -> o.node("createdAt").isEqualTo(Utils.formatDate(task.getCreatedAt()))
         );
     }
