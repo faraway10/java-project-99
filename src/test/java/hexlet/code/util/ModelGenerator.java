@@ -33,12 +33,16 @@ public final class ModelGenerator {
     @Autowired
     private LabelRepository labelRepository;
 
+    private int emailNum = 0;
+    private int statusNum = 0;
+    private int labelNum = 0;
+
     public User getNewSavedUser() {
         var user = Instancio.of(User.class)
                 .ignore(Select.field(User::getId))
                 .supply(Select.field(User::getFirstName), () -> faker.name().firstName())
                 .supply(Select.field(User::getLastName), () -> faker.name().lastName())
-                .supply(Select.field(User::getEmail), () -> faker.internet().emailAddress())
+                .supply(Select.field(User::getEmail), () -> "user" + emailNum++ + "@example.com")
                 .supply(Select.field(User::getPassword), () -> faker.internet().password(3, 32))
                 .create();
         userRepository.save(user);
@@ -49,7 +53,7 @@ public final class ModelGenerator {
         var taskStatus = Instancio.of(TaskStatus.class)
                 .ignore(Select.field(TaskStatus::getId))
                 .supply(Select.field(TaskStatus::getName), () -> faker.lorem().word())
-                .supply(Select.field(TaskStatus::getSlug), () -> String.join("_", faker.lorem().words(9)))
+                .supply(Select.field(TaskStatus::getSlug), () -> "status" + statusNum++)
                 .create();
         taskStatusRepository.save(taskStatus);
         return taskStatus;
@@ -75,7 +79,7 @@ public final class ModelGenerator {
     public Label getNewSavedLabel() {
         var label = Instancio.of(Label.class)
                 .ignore(Select.field(Label::getId))
-                .supply(Select.field(Label::getName), () -> String.join(" ", faker.lorem().words(9)))
+                .supply(Select.field(Label::getName), () -> "label" + labelNum++)
                 .create();
         labelRepository.save(label);
         return label;

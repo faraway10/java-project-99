@@ -229,8 +229,6 @@ class TasksControllerTest {
         data.put("status", status);
         data.put("taskLabelIds", taskLabelIds);
 
-        System.out.println("Debug: " + om.writeValueAsString(data));
-
         var request = put("/api/tasks/" + testTask.getId())
                 .with(jwt())
                 .contentType(MediaType.APPLICATION_JSON)
