@@ -12,3 +12,7 @@ spring:
 rsa:
   private-key: classpath:certs/private.pem
   public-key: classpath:certs/public.pem
+
+sentry:
+  dsn: https://47f430c8662c48a8e99ee49fd1a8d5cd@o4508231975436288.ingest.de.sentry.io/4508232019673168
+  traces-sample-rate: 1.0
