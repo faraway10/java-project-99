@@ -12,7 +12,6 @@ import net.datafaker.Faker;
 import org.instancio.Instancio;
 import org.instancio.Select;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
@@ -34,11 +33,6 @@ public final class ModelGenerator {
     @Autowired
     private LabelRepository labelRepository;
 
-    @Bean
-    public ModelGenerator getModelGenerator() {
-        return this;
-    }
-
     public User getNewSavedUser() {
         var user = Instancio.of(User.class)
                 .ignore(Select.field(User::getId))
@@ -55,7 +49,7 @@ public final class ModelGenerator {
         var taskStatus = Instancio.of(TaskStatus.class)
                 .ignore(Select.field(TaskStatus::getId))
                 .supply(Select.field(TaskStatus::getName), () -> faker.lorem().word())
-                .supply(Select.field(TaskStatus::getSlug), () -> String.join("_", faker.lorem().words(3)))
+                .supply(Select.field(TaskStatus::getSlug), () -> String.join("_", faker.lorem().words(9)))
                 .create();
         taskStatusRepository.save(taskStatus);
         return taskStatus;
@@ -81,7 +75,7 @@ public final class ModelGenerator {
     public Label getNewSavedLabel() {
         var label = Instancio.of(Label.class)
                 .ignore(Select.field(Label::getId))
-                .supply(Select.field(Label::getName), () -> String.join(" ", faker.lorem().words(3)))
+                .supply(Select.field(Label::getName), () -> String.join(" ", faker.lorem().words(9)))
                 .create();
         labelRepository.save(label);
         return label;

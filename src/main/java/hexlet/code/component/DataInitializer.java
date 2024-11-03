@@ -18,8 +18,8 @@ import org.springframework.stereotype.Component;
 
 import lombok.AllArgsConstructor;
 
-import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Component
 @AllArgsConstructor
@@ -82,7 +82,7 @@ class DataInitializer implements ApplicationRunner {
         task.setAssignee(user);
         task.setName("Init task");
         task.setTaskStatus(taskStatusRepository.findAll().getFirst());
-        task.setLabels(new HashSet<>(labelRepository.findAll()));
+        task.setLabels(Set.of(labelRepository.findAll().getFirst()));
         taskRepository.save(task);
     }
 }

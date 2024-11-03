@@ -100,7 +100,7 @@ class LabelsControllerTest {
 
     @Test
     public void testCreate() throws Exception {
-        var name = String.join(" ", faker.lorem().words(3));
+        var name = String.join(" ", faker.lorem().words(9));
 
         var data = new HashMap<>();
         data.put("name", name);
@@ -145,7 +145,7 @@ class LabelsControllerTest {
     public void testUpdate() throws Exception {
         var testLabel = modelGenerator.getNewSavedLabel();
         var data = new HashMap<>();
-        var name = String.join(" ", faker.lorem().words(3));
+        var name = String.join(" ", faker.lorem().words(9));
         data.put("name", name);
 
         var request = put("/api/labels/" + testLabel.getId())

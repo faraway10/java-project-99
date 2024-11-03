@@ -108,6 +108,34 @@ class TasksControllerTest {
     }
 
     @Test
+    public void testIndexComplexCondition() throws Exception {
+        var task = modelGenerator.getNewSavedTask();
+        var titleCont = task.getName()
+                .substring(2, task.getName().length() - 2)
+                .replace(" ", "%20");
+        var assigneeId = task.getAssignee().getId();
+        var statusSlug = task.getTaskStatus().getSlug();
+        var labelId = task.getLabels().iterator().next().getId();
+
+        var url = "/api/tasks?titleCont=" + titleCont
+            + "&assigneeId=" + assigneeId + "&status=" + statusSlug + "&labelId=" + labelId;
+
+        var response = mockMvc.perform(get(url).with(jwt()))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse();
+        var body = response.getContentAsString();
+
+        assertThatJson(body).isArray().allSatisfy(element ->
+                assertThatJson(element)
+                        .and(v -> v.node("title").asString().containsIgnoringCase(titleCont))
+                        .and(v -> v.node("assigneeId").asNumber().isEqualTo(assigneeId))
+                        .and(v -> v.node("status").asString().isEqualTo(statusSlug))
+                        .and(v -> v.node("labelId").asNumber().isEqualTo(labelId))
+        );
+    }
+
+    @Test
     public void testCreate() throws Exception {
         var index = faker.number().positive();
         var assigneeId = userRepository.findByEmail("hexlet@example.com").get().getId();

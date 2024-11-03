@@ -96,7 +96,7 @@ class TaskStatusesControllerTest {
     @Test
     public void testCreate() throws Exception {
         var name = faker.lorem().word();
-        var slug = String.join("_", faker.lorem().words(3));
+        var slug = String.join("_", faker.lorem().words(9));
 
         var data = new HashMap<>();
         data.put("name", name);
