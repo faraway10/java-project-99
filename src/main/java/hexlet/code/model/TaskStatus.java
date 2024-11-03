@@ -31,7 +31,6 @@ public final class TaskStatus implements BaseEntity {
     private long id;
 
     @Size(min = 1)
-    @Column(unique = true)
     private String name;
 
     @Size(min = 1)
