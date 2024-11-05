@@ -11,7 +11,6 @@ import hexlet.code.repository.TaskStatusRepository;
 import hexlet.code.repository.UserRepository;
 
 import org.apache.commons.text.WordUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
@@ -24,20 +23,10 @@ import java.util.Set;
 @Component
 @AllArgsConstructor
 class DataInitializer implements ApplicationRunner {
-
-    @Autowired
     private final UserRepository userRepository;
-
-    @Autowired
     private final UserMapper userMapper;
-
-    @Autowired
     private final TaskStatusRepository taskStatusRepository;
-
-    @Autowired
     private final TaskRepository taskRepository;
-
-    @Autowired
     private final LabelRepository labelRepository;
 
     private final List<String> defaultTaskStatusSlugs = List.of(

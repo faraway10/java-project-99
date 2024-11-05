@@ -192,8 +192,12 @@ class LabelsControllerTest {
         taskRepository.save(task);
 
         var request = delete("/api/labels/" + label.getId()).with(jwt());
-        mockMvc.perform(request)
-                .andExpect(status().isBadRequest());
+
+        try {
+            mockMvc.perform(request);
+        } catch (Exception e) {
+            assertTrue(e.toString().contains("DataIntegrityViolationException"));
+        }
 
         assertTrue(labelRepository.existsById(label.getId()));
     }

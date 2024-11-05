@@ -5,12 +5,11 @@ import java.util.List;
 import hexlet.code.dto.user.UserCreateDTO;
 import hexlet.code.dto.user.UserDTO;
 import hexlet.code.dto.user.UserUpdateDTO;
-import hexlet.code.exception.BadRequestException;
 import hexlet.code.exception.ResourceNotFoundException;
 import hexlet.code.mapper.UserMapper;
 import hexlet.code.repository.TaskRepository;
 import hexlet.code.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -28,13 +27,11 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/users")
+@AllArgsConstructor
 class UsersController {
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private TaskRepository taskRepository;
-    @Autowired
-    private UserMapper userMapper;
+    private final UserRepository userRepository;
+    private final TaskRepository taskRepository;
+    private final UserMapper userMapper;
     private static final String IS_ALLOWED
             = "@userRepository.findById(#id).get().getEmail() == authentication.getName()";
 
@@ -81,10 +78,6 @@ class UsersController {
     @PreAuthorize(IS_ALLOWED)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void destroy(@PathVariable Long id) {
-        if (taskRepository.existsByAssigneeId(id)) {
-            throw new BadRequestException("User with " + id + " still has a task");
-        }
-
         userRepository.deleteById(id);
     }
 }

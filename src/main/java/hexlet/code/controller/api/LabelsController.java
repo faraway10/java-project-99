@@ -3,13 +3,12 @@ package hexlet.code.controller.api;
 import hexlet.code.dto.label.LabelCreateDTO;
 import hexlet.code.dto.label.LabelDTO;
 import hexlet.code.dto.label.LabelUpdateDTO;
-import hexlet.code.exception.BadRequestException;
 import hexlet.code.exception.ResourceNotFoundException;
 import hexlet.code.mapper.LabelMapper;
 import hexlet.code.repository.TaskRepository;
 import hexlet.code.repository.LabelRepository;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -26,15 +25,11 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/labels")
+@AllArgsConstructor
 class LabelsController {
-    @Autowired
-    private LabelRepository labelRepository;
-
-    @Autowired
-    private TaskRepository taskRepository;
-
-    @Autowired
-    private LabelMapper labelMapper;
+    private final LabelRepository labelRepository;
+    private final TaskRepository taskRepository;
+    private final LabelMapper labelMapper;
 
     @GetMapping("")
     public ResponseEntity<List<LabelDTO>> index() {
@@ -77,10 +72,6 @@ class LabelsController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void destroy(@PathVariable Long id) {
-        if (taskRepository.existsByLabelsId(id)) {
-            throw new BadRequestException("Label with id " + id + " still in use");
-        }
-
         labelRepository.deleteById(id);
     }
 }

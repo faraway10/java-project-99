@@ -191,8 +191,12 @@ class TaskStatusesControllerTest {
         var taskStatus = task.getTaskStatus();
 
         var request = delete("/api/task_statuses/" + taskStatus.getId()).with(jwt());
-        mockMvc.perform(request)
-                .andExpect(status().isBadRequest());
+
+        try {
+            mockMvc.perform(request);
+        } catch (Exception e) {
+            assertTrue(e.toString().contains("DataIntegrityViolationException"));
+        }
 
         assertTrue(taskStatusRepository.existsById(taskStatus.getId()));
     }

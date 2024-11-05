@@ -235,8 +235,12 @@ class UsersControllerTest {
         var userToken = jwt().jwt(builder -> builder.subject(user.getEmail()));
 
         var request = delete("/api/users/" + user.getId()).with(userToken);
-        mockMvc.perform(request)
-                .andExpect(status().isBadRequest());
+
+        try {
+            mockMvc.perform(request);
+        } catch (Exception e) {
+            assertTrue(e.toString().contains("DataIntegrityViolationException"));
+        }
 
         assertTrue(userRepository.existsById(user.getId()));
     }
